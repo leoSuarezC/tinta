@@ -29,7 +29,11 @@ jobs:
       # se escribe en config.json al compilar (así no hace falta guardarla en el repositorio).
       - name: Client ID de Google
         if: ${{ vars.GOOGLE_CLIENT_ID != '' }}
-        run: echo "{\"googleClientId\": \"${{ vars.GOOGLE_CLIENT_ID }}\"}" > public/config.json
+        # Bloque `|` porque un escalar plano no admite ": " (rompía el YAML); el valor llega por env, no interpolado en el shell.
+        env:
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+        run: |
+          printf '{ "googleClientId": "%s" }\n' "$GOOGLE_CLIENT_ID" > public/config.json
       - run: npm run build
       - uses: actions/upload-pages-artifact@v5
         with:
