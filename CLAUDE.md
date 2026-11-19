@@ -40,6 +40,9 @@ Traspaso para Claude Code. Léelo completo antes de cambiar algo. Detalle técni
 
 **Carpeta de Drive y git:** el sistema de archivos de Drive hace que git marque archivos como modificados sin diff (mismo hash). Si `git pull` se queja de "local changes", revisar con `git diff` (vacío) y hacer `git add <archivo>`. En ese repo se configuró `core.trustctime=false` y `core.checkStat=minimal`.
 
+**Push en LeoPC:** `git push` con el Git Credential Manager (global) se cuelga esperando una ventana. Sin tocar la configuración global, usar la sesión de `gh` (cuenta `leoSuarezC`):
+`git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push origin main` (o, si Leonardo lo aprueba, `gh auth setup-git` una vez).
+
 **Hecho y probado automáticamente:** todo lo de la lista de arriba. 54 pruebas unitarias (motor de sincronización con dos "dispositivos" compartiendo un Drive simulado, fusión, cliente HTTP de Drive, formato de tinta en PDF, edición Markdown) y 32 pruebas de punta a punta (16 escenarios × perfil teléfono y escritorio), incluidos tres escenarios del camino real de Google contra un **Google simulado** (pantalla OAuth + API REST de Drive v3 respaldada por `FakeDrive`).
 
 **Todavía NO verificado:**
