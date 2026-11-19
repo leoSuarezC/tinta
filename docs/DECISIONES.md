@@ -90,3 +90,8 @@ Registro de por qué Tinta es como es, para no deshacer algo sin conocer el moti
 - **Decisión (Leonardo):** `leoSuarezC/tinta` público; Pages con `build_type=workflow` (`deploy.yml`). La app queda en `https://leosuarezc.github.io/tinta/`.
 - **Por qué no hay riesgo:** el repositorio no tiene secretos; el Client ID de OAuth es público por diseño (viaja en el JS) y se inyecta con la *variable* (no secreto) `GOOGLE_CLIENT_ID`.
 - **Cambiaría si:** se quiere el código privado → GitHub Pro, o Azure Static Web Apps (gratis con repo privado).
+
+## D20 — App de Google "In production" sin verificar
+- **Contexto (2026-11-19):** en modo prueba, Google exige volver a dar permiso cada 7 días; para publicar una app External pide página de inicio, política de privacidad y dominios autorizados.
+- **Decisión:** publicada (In production) sin pedir verificación: se acepta la pantalla "Google no verificó esta app" (una vez por dispositivo) y el tope de 100 usuarios. Política de privacidad = sección "Privacidad y permisos" del README en GitHub; dominios autorizados `leosuarezc.github.io` y `github.com`. Sin logo (subir uno obligaría a verificar).
+- **Cambiaría si:** la app la usa más gente → verificación de Google (el alcance `drive` es restringido: exige evaluación de seguridad), o pasar a `drive.file`.
