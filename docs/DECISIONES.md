@@ -84,3 +84,9 @@ Registro de por qué Tinta es como es, para no deshacer algo sin conocer el moti
 - **Decisión:** en LeoPC las e2e corren con `PW_CHROMIUM` apuntando a `C:\Program Files\Google\Chrome\Application\chrome.exe` (la variable ya la soportaba `playwright.config.ts`). No se cambió la configuración.
 - **Costo:** se prueba con un Chrome más nuevo que el de Playwright; ninguno de los dos es el 138 del Boox.
 - **Cambiaría si:** la instalación de Playwright vuelve a funcionar, o se quiere fijar Chrome en la configuración (`channel: 'chrome'`).
+
+## D19 — Repositorio público en GitHub y Pages por Actions
+- **Contexto (2026-11-19):** GitHub Pages gratis solo publica repositorios públicos.
+- **Decisión (Leonardo):** `leoSuarezC/tinta` público; Pages con `build_type=workflow` (`deploy.yml`). La app queda en `https://leosuarezc.github.io/tinta/`.
+- **Por qué no hay riesgo:** el repositorio no tiene secretos; el Client ID de OAuth es público por diseño (viaja en el JS) y se inyecta con la *variable* (no secreto) `GOOGLE_CLIENT_ID`.
+- **Cambiaría si:** se quiere el código privado → GitHub Pro, o Azure Static Web Apps (gratis con repo privado).
