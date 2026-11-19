@@ -72,3 +72,15 @@ Registro de por qué Tinta es como es, para no deshacer algo sin conocer el moti
 ## D16 — Identidad visual propia
 - **Decisión:** el motivo del cuaderno colombiano (renglones azules, margen rojo, tinta azul-negra) en vez de una plantilla genérica; Atkinson Hyperlegible Next para la interfaz (muy legible, buena en e-ink) y Literata para el texto de las notas (diseñada para leer en pantalla y e-ink). Fuentes auto-alojadas para funcionar sin conexión.
 - **Regla:** la personalidad está en la hoja de la nota; el resto de la interfaz es sobria.
+
+## D17 — Desarrollo en un clon local, no en la carpeta de Drive
+- **Contexto (2026-11-19):** `npm ci` dentro de la carpeta de Google Drive para escritorio falla siempre (`EBADF`, `TAR_ENTRY_ERROR`); además Drive intentaría subir miles de archivos de `node_modules`.
+- **Decisión:** el repositorio git vive en `📝notesApp/` (Drive, fuente de verdad y respaldo); el trabajo diario (instalar, probar, compilar, commits) se hace en el clon `C:\dev\tinta` y se trae a Drive con `git pull`. Cuando exista el repositorio de GitHub pasa a ser el remoto común.
+- **Descartado:** `node_modules` con una unión de directorio (Drive puede seguir el enlace); pausar Drive cada vez que se instala.
+- **Cambiaría si:** Drive permite excluir carpetas, o el proyecto deja de vivir en Drive.
+
+## D18 — E2E con el Chrome instalado en LeoPC
+- **Contexto (2026-11-19):** `npx playwright install chromium` se cuelga al extraer `chrome.dll` y deja builds dañadas.
+- **Decisión:** en LeoPC las e2e corren con `PW_CHROMIUM` apuntando a `C:\Program Files\Google\Chrome\Application\chrome.exe` (la variable ya la soportaba `playwright.config.ts`). No se cambió la configuración.
+- **Costo:** se prueba con un Chrome más nuevo que el de Playwright; ninguno de los dos es el 138 del Boox.
+- **Cambiaría si:** la instalación de Playwright vuelve a funcionar, o se quiere fijar Chrome en la configuración (`channel: 'chrome'`).

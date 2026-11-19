@@ -32,7 +32,9 @@ Traspaso para Claude Code. Léelo completo antes de cambiar algo. Detalle técni
 | Onyx Boox Note2 | **Android 9: Chrome congelado en la versión 138** (no recibe más actualizaciones). Pantalla e-ink 1404×1872 → ≈ 702×936 px CSS. Lápiz Wacom. La tinta en una app web tiene la latencia normal del e-ink (la tinta instantánea de Onyx solo existe para apps nativas con su SDK). |
 | Laptop Windows (+ monitor) | Edge o Chrome, instalada como PWA. Mouse y teclado: arrastrar archivos, pegar capturas, atajos. |
 
-## Estado (18 nov 2026)
+## Estado (19 nov 2026)
+
+**Última sesión (2026-11-19, LeoPC):** `git init` (rama `main`) + primer commit; `npm ci` dentro de Google Drive falla (`EBADF`), así que se trabaja en el clon local `C:\dev\tinta` (ver "Trabajar desde Google Drive"). Pruebas en verde en el clon: `typecheck` OK, **54/54 unitarias**, **32/32 e2e** (con Chrome 157 instalado vía `PW_CHROMIUM`, ver "Comandos"). Las versiones de las acciones de `deploy.yml` (checkout@v5, setup-node@v6, upload-pages-artifact@v5, deploy-pages@v5) existen. Falta: repositorio en GitHub, Pages y Client ID (los pasos los hace Leonardo; guía en README → "Puesta en marcha").
 
 **Hecho y probado automáticamente:** todo lo de la lista de arriba. 54 pruebas unitarias (motor de sincronización con dos "dispositivos" compartiendo un Drive simulado, fusión, cliente HTTP de Drive, formato de tinta en PDF, edición Markdown) y 32 pruebas de punta a punta (16 escenarios × perfil teléfono y escritorio), incluidos tres escenarios del camino real de Google contra un **Google simulado** (pantalla OAuth + API REST de Drive v3 respaldada por `FakeDrive`).
 
@@ -55,6 +57,10 @@ npx playwright test             # e2e: compila y sirve dist/ en el puerto 4174; 
 npx playwright test -g "nota a mano"   # un escenario
 ```
 
+- **En LeoPC (Windows) `npx playwright install chromium` no sirve:** la descarga se cuelga al extraer `chrome.dll` (dos intentos) y la build que sí terminó quedó dañada ("side-by-side configuration is incorrect"). Se usa el Chrome instalado:
+  `PW_CHROMIUM="C:/Program Files/Google/Chrome/Application/chrome.exe" npx playwright test` (Bash) o
+  `$env:PW_CHROMIUM='C:\Program Files\Google\Chrome\Application\chrome.exe'; npx playwright test` (PowerShell).
+  Es más nuevo que el Chromium de Playwright 1.56.1 (141), pero las 32 pasan. Ojo: no prueba Chrome 138 (Boox); la compatibilidad con 138 sigue dependiendo de `build.target`.
 - El e2e compila solo antes de correr (`webServer` en `playwright.config.ts`); si el puerto 4174 está ocupado por un `vite preview` viejo, ciérralo.
 - Para probar con Google en local, el cliente OAuth debe tener el origen `http://localhost:5173` y la redirección `http://localhost:5173/`.
 - Client ID: `public/config.json` (`{ "googleClientId": "…" }`), o la variable de GitHub `GOOGLE_CLIENT_ID` (el flujo la escribe al compilar), o pegado en la pantalla de bienvenida (se guarda por dispositivo en `localStorage`).
@@ -120,8 +126,12 @@ scripts/copy-pdf-assets.mjs   Copia cmaps, standard_fonts, wasm e iccs de pdfjs-
 
 ## Trabajar desde Google Drive
 
-- `node_modules/`, `dist/`, `public/pdfjs/`, `test-results/` y `playwright-report/` son generados (están en `.gitignore`). Google Drive para escritorio no permite excluir carpetas: `npm ci` aquí crea miles de archivos que Drive intentará subir. Si eso se vuelve lento, trabaja en un clon local con git y deja esta carpeta como copia.
-- Recomendado: `git init` aquí mismo (no hay historial todavía) y usar GitHub como respaldo; también hace falta para GitHub Pages.
+- **`npm ci` no funciona dentro de Google Drive** (2026-11-19: `EBADF` / `TAR_ENTRY_ERROR` dos veces; Drive para escritorio bloquea archivos mientras npm los escribe). Por eso:
+  - `📝notesApp/` (en Drive) tiene el repositorio git (rama `main`) y es la **fuente de verdad**; ahí no hay `node_modules`.
+  - Se trabaja en el clon local **`C:\dev\tinta`** (en LeoPC; en otra máquina: `git clone "<ruta a 📝notesApp>" C:\dev\tinta` + `npm ci`). Ahí se instala, se prueba y se hacen los commits.
+  - Para llevar los cambios a Drive: `git -C "<ruta a 📝notesApp>" pull C:\dev\tinta main` (no se hace push hacia la carpeta de Drive porque tiene `main` desprotegida).
+  - Cuando exista el repositorio de GitHub, ese será el remoto común de los dos.
+- `.gitattributes` fuerza LF (`autocrlf` está activo en el git de LeoPC).
 - No edites los mismos archivos a la vez desde la web de Drive y desde el PC.
 
 ## Pendientes y siguientes pasos
