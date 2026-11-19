@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#f0f3f8" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Notas, escritura a mano, audio y PDF sincronizados con una carpeta de Google Drive." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Tinta" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <title>Tinta</title>
+    <script>
+      // Tema antes del primer pintado (evita el destello claro/oscuro).
+      try {
+        var s = JSON.parse(localStorage.getItem('tinta.settings') || '{}');
+        var d = document.documentElement;
+        var dark = s.theme === 'dark' || ((s.theme || 'system') === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        d.dataset.theme = s.eink ? 'light' : dark ? 'dark' : 'light';
+        d.dataset.eink = s.eink ? '1' : '0';
+        if (s.noteSize) d.style.setProperty('--note-size', s.noteSize + 'px');
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Tinta necesita JavaScript.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
