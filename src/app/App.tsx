@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { NotebookPen } from 'lucide-react';
 import { ServicesContext, setMode, saveClientId, type AppConfig, type Services } from './services';
 import { go, initRouter, useApp } from './state';
 import { flushAll, msSinceInput, reauthHeld, useMediaQuery, WIDE_QUERY } from './hooks';
@@ -209,19 +208,11 @@ function Main({ services }: { services: Services }) {
   return (
     <div className={cls('shell', file && 'has-file', wide && 'is-wide')}>
       {showExplorer && <Explorer />}
-      {file ? (
+      {/* Sin archivo abierto, la carpeta ocupa toda la pantalla (más tarjetas a la vista). */}
+      {file && (
         <main className="pane">
           <FileView lid={file} />
         </main>
-      ) : (
-        wide && (
-          <main className="pane pane-empty">
-            <div className="pane-hint">
-              <NotebookPen size={44} strokeWidth={1.4} aria-hidden="true" />
-              <p>Abre una nota o crea una con el botón +</p>
-            </div>
-          </main>
-        )
       )}
       {status.state === 'auth' && auth && (auth.recentlyFailedSilently() || !navigator.onLine) && (
         <div className="banner" role="status">

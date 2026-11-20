@@ -366,31 +366,46 @@ code {
 :root[data-eink='1'] .shell.is-wide .explorer {
   border-right: 2px solid #000;
 }
+/* Escritorio sin archivo abierto: la carpeta a pantalla completa. */
+.shell.is-wide:not(.has-file) .explorer {
+  flex: 1;
+  width: auto;
+  background: var(--paper);
+  border-right: 0;
+}
+.shell.is-wide:not(.has-file) .cards {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding-inline: 24px;
+}
+.shell.is-wide:not(.has-file) .card-preview {
+  height: 180px;
+}
+.shell.is-wide:not(.has-file) .rows {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px 16px;
+  padding: 8px 24px 0;
+}
+.shell.is-wide:not(.has-file) .rows .row {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.shell.is-wide:not(.has-file) .rows .row-side {
+  min-width: 0;
+}
+.shell.is-wide:not(.has-file) .rows + .cards {
+  padding-top: 18px;
+}
+:root[data-eink='1'] .shell.is-wide:not(.has-file) .rows .row {
+  border: 2px solid #000;
+}
 .pane {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-}
-.pane-empty {
-  display: grid;
-  place-items: center;
-  background:
-    linear-gradient(90deg, transparent 63px, color-mix(in srgb, var(--margin) 45%, transparent) 63px, color-mix(in srgb, var(--margin) 45%, transparent) 64.5px, transparent 64.5px),
-    repeating-linear-gradient(to bottom, transparent 0 31px, color-mix(in srgb, var(--rule) 70%, transparent) 31px 32px);
-}
-:root[data-eink='1'] .pane-empty {
-  background: #fff;
-}
-.pane-hint {
-  text-align: center;
-  color: var(--ink-2);
-  background: var(--paper);
-  padding: 18px 26px;
-  border-radius: 14px;
-}
-.pane-hint p {
-  margin: 8px 0 0;
 }
 .boot {
   height: 100%;
