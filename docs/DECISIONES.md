@@ -100,4 +100,4 @@ Registro de por qué Tinta es como es, para no deshacer algo sin conocer el moti
 - **Contexto (2026-11-20):** Leonardo prefirió que nadie más pueda siquiera autorizar la app, aunque el riesgo en producción era bajo (cada usuario solo ve su propio Drive).
 - **Decisión:** Google Auth Platform en **Testing**, con `elionxl900@gmail.com` como único usuario de prueba. Branding y dominios de D20 se conservan (sirven si algún día se vuelve a publicar).
 - **Costo:** Google exige volver a dar permiso cada 7 días (la app muestra "Reconectar").
-- **Riesgo que sigue:** quien controle la cuenta de GitHub controla el código que usa el token → la cuenta de GitHub debe tener verificación en dos pasos.
+- **Riesgo que sigue:** quien controle la cuenta de GitHub controla el código que usa el token → la cuenta de GitHub debe tener verificación en dos pasos. Verificado 2026-11-20: 2FA activo en `leoSuarezC` (app autenticadora + GitHub Mobile).
