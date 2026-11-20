@@ -95,3 +95,9 @@ Registro de por qué Tinta es como es, para no deshacer algo sin conocer el moti
 - **Contexto (2026-11-19):** en modo prueba, Google exige volver a dar permiso cada 7 días; para publicar una app External pide página de inicio, política de privacidad y dominios autorizados.
 - **Decisión:** publicada (In production) sin pedir verificación: se acepta la pantalla "Google no verificó esta app" (una vez por dispositivo) y el tope de 100 usuarios. Política de privacidad = sección "Privacidad y permisos" del README en GitHub; dominios autorizados `leosuarezc.github.io` y `github.com`. Sin logo (subir uno obligaría a verificar).
 - **Cambiaría si:** la app la usa más gente → verificación de Google (el alcance `drive` es restringido: exige evaluación de seguridad), o pasar a `drive.file`.
+
+## D21 — Volver a Testing con un solo usuario de prueba (reemplaza parte de D20)
+- **Contexto (2026-11-20):** Leonardo prefirió que nadie más pueda siquiera autorizar la app, aunque el riesgo en producción era bajo (cada usuario solo ve su propio Drive).
+- **Decisión:** Google Auth Platform en **Testing**, con `elionxl900@gmail.com` como único usuario de prueba. Branding y dominios de D20 se conservan (sirven si algún día se vuelve a publicar).
+- **Costo:** Google exige volver a dar permiso cada 7 días (la app muestra "Reconectar").
+- **Riesgo que sigue:** quien controle la cuenta de GitHub controla el código que usa el token → la cuenta de GitHub debe tener verificación en dos pasos.
