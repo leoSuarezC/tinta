@@ -524,6 +524,172 @@ code {
   margin: 0;
   padding: 0;
 }
+/* Tarjetas de archivos: vista previa del contenido, como hojas sueltas sobre la mesa. */
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 12px 14px 4px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 42vw), 1fr));
+  gap: 12px;
+}
+.rows + .cards {
+  padding-top: 14px;
+}
+.card {
+  position: relative;
+  min-width: 0;
+}
+.card-main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: inherit;
+  text-align: left;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.card-main:hover {
+  border-color: var(--rule-strong);
+  box-shadow: 0 4px 14px -8px rgba(25, 32, 58, 0.35);
+}
+.card.is-active .card-main {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 1px var(--blue);
+}
+.card.has-error .card-main {
+  border-color: var(--danger);
+}
+.card-preview {
+  position: relative;
+  display: block;
+  height: 138px;
+  overflow: hidden;
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--rule);
+}
+.card-preview.k-markdown,
+.card-preview.k-text {
+  background: var(--paper);
+}
+/* La nota se desvanece al final, como una hoja que sigue. */
+.card-preview.k-markdown::after,
+.card-preview.k-text::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 28px;
+  background: linear-gradient(transparent, var(--paper));
+}
+.card-text {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 0;
+  font-family: var(--font-note);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.card-text.is-empty {
+  color: var(--ink-3);
+  font-style: italic;
+}
+.card-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-height: 1.45em;
+}
+.card-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Páginas (cuadernos y PDF): se ve la parte de arriba de la hoja. */
+.card-img.is-page {
+  object-position: top;
+  background: #fff;
+}
+.card-icon {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--ink-3);
+}
+.card-preview.k-pdf .card-icon {
+  color: var(--margin);
+}
+.card-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 34px 8px 10px;
+  min-width: 0;
+}
+.card .card-name {
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.card-kind {
+  display: inline-flex;
+  flex: none;
+  color: var(--ink-3);
+}
+.card-kind.k-pdf {
+  color: var(--margin);
+}
+.card-date {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.card-more {
+  position: absolute;
+  right: 2px;
+  bottom: 4px;
+}
+:root[data-eink='1'] .card-main {
+  border: 2px solid #000;
+}
+:root[data-eink='1'] .card-main:hover {
+  box-shadow: none;
+}
+:root[data-eink='1'] .card.is-active .card-main {
+  border-width: 4px;
+  box-shadow: none;
+}
+:root[data-eink='1'] .card-preview,
+:root[data-eink='1'] .card-preview.k-markdown::after,
+:root[data-eink='1'] .card-preview.k-text::after {
+  background: #fff;
+}
+:root[data-eink='1'] .card-preview {
+  border-bottom: 2px solid #000;
+}
+:root[data-eink='1'] .card-img:not(.is-page) {
+  filter: grayscale(1) contrast(1.15);
+}
+
 /* Cada fila se apoya en un renglón azul, como en un cuaderno. */
 .row {
   position: relative;

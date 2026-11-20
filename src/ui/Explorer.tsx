@@ -10,6 +10,7 @@ import { formatBytes } from '../model/fileTypes';
 import { cls, Empty, KindIcon, useLongPress } from './common';
 import { displayName, fold, isPending, itemKind, KIND_LABEL, relativeDate } from './format';
 import { SyncButton } from './SyncButton';
+import { FileCard } from './FileCard';
 import { PageButtons } from './PageButtons';
 
 export function Explorer() {
@@ -165,11 +166,7 @@ function FolderList({ folderLid }: { folderLid: string }) {
           <h2 className="group-title">
             <Star size={15} aria-hidden="true" /> Destacadas
           </h2>
-          <ul className="rows">
-            {starred.map((i) => (
-              <ItemRow key={`s-${i.lid}`} item={i} active={i.lid === fileLid} count={counts.get(i.lid)} showFolder />
-            ))}
-          </ul>
+          <Items items={starred} fileLid={fileLid} counts={counts} showFolder keyPrefix="s-" />
         </section>
       )}
       {items.length === 0 ? (
@@ -182,12 +179,44 @@ function FolderList({ folderLid }: { folderLid: string }) {
             <h2 className="group-title">{starred.length > 0 ? 'Todo' : <span className="sr-only">Contenido</span>}</h2>
             <SortToggle />
           </div>
-          <ul className="rows">
-            {items.map((i) => (
-              <ItemRow key={i.lid} item={i} active={i.lid === fileLid} count={counts.get(i.lid)} />
-            ))}
-          </ul>
+          <Items items={items} fileLid={fileLid} counts={counts} />
         </section>
+      )}
+    </>
+  );
+}
+
+/** Carpetas como filas arriba; archivos como tarjetas con vista previa debajo. */
+function Items({
+  items,
+  fileLid,
+  counts,
+  showFolder,
+  keyPrefix = '',
+}: {
+  items: LocalItem[];
+  fileLid?: string;
+  counts: Map<string, number>;
+  showFolder?: boolean;
+  keyPrefix?: string;
+}) {
+  const folders = items.filter((i) => i.isFolder);
+  const files = items.filter((i) => !i.isFolder);
+  return (
+    <>
+      {folders.length > 0 && (
+        <ul className="rows">
+          {folders.map((i) => (
+            <ItemRow key={keyPrefix + i.lid} item={i} active={i.lid === fileLid} count={counts.get(i.lid)} showFolder={showFolder} />
+          ))}
+        </ul>
+      )}
+      {files.length > 0 && (
+        <ul className="cards">
+          {files.map((i) => (
+            <FileCard key={keyPrefix + i.lid} item={i} active={i.lid === fileLid} showFolder={showFolder} />
+          ))}
+        </ul>
       )}
     </>
   );

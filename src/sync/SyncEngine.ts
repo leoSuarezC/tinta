@@ -131,6 +131,7 @@ export class SyncEngine {
       modifiedTime: f.modifiedTime,
       starred: !!f.starred,
       webViewLink: f.webViewLink,
+      thumbnailLink: f.thumbnailLink,
       canEdit: f.capabilities?.canEdit !== false,
       shortcutTargetId: f.shortcutDetails?.targetId,
       base: { name: f.name, parentDriveId: f.parents?.[0] ?? null, md5: f.md5Checksum, version: f.version, starred: !!f.starred },
@@ -341,6 +342,7 @@ export class SyncEngine {
       }
       cur.base = { name: f.name, parentDriveId: parent.driveId, starred: !!f.starred, version: f.version, md5: cur.base?.md5 };
       cur.webViewLink = f.webViewLink ?? cur.webViewLink;
+      cur.thumbnailLink = f.thumbnailLink ?? (contentChanged ? undefined : cur.thumbnailLink);
       cur.canEdit = f.capabilities?.canEdit !== false;
       if (contentChanged) {
         cur.remoteMd5 = f.md5Checksum;
@@ -517,6 +519,7 @@ export class SyncEngine {
       }
       if (opts.metaSent && cur.metaRev === opts.metaRev) cur.dirtyMeta = false;
       cur.webViewLink = res.webViewLink ?? cur.webViewLink;
+      cur.thumbnailLink = res.thumbnailLink ?? cur.thumbnailLink;
       cur.canEdit = res.capabilities?.canEdit !== false;
       cur.syncError = undefined;
       await items.put(cur);
@@ -802,7 +805,9 @@ export class SyncEngine {
     const tx = this.store.db.transaction(['items', 'contents'], 'readwrite');
     const cur = await tx.objectStore('items').get(lid);
     let replaced = false;
+    let newlyCached = false;
     if (cur && cur.rev === rev && !cur.dirtyContent) {
+      newlyCached = !cur.cached;
       const prev = await tx.objectStore('contents').get(lid);
       replaced = text !== undefined ? prev?.text !== undefined && prev.text !== text : !!prev?.blob;
       cur.cached = (cur.remoteMd5 ?? cur.base?.md5) === target;
@@ -814,6 +819,8 @@ export class SyncEngine {
     }
     await tx.done;
     if (replaced) this.contentFns.forEach((f) => f(lid));
+    // Avisar a la lista: la tarjeta ya puede mostrar la vista previa sin conexión.
+    if (newlyCached && text === undefined) this.emitChange();
     return text !== undefined ? { text } : { blob };
   }
 
@@ -994,6 +1001,17 @@ export class SyncEngine {
         c.metaRev++;
       });
     await this.afterLocalChange(800);
+  }
+
+  /** Pide a Drive un enlace nuevo a la miniatura (los enlaces vencen en unas horas). */
+  async refreshThumbnail(lid: string): Promise<string | undefined> {
+    const item = await this.store.getItem(lid);
+    if (!item?.driveId) return undefined;
+    const f = await this.drive.getFile(item.driveId);
+    await this.store.updateItem(lid, (cur) => {
+      cur.thumbnailLink = f.thumbnailLink;
+    });
+    return f.thumbnailLink;
   }
 
   /** Texto del archivo: local si está al día; si no, lo descarga (o usa la copia vieja sin conexión). */

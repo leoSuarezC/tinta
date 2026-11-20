@@ -80,7 +80,7 @@ export const line = (x0: number, y0: number, x1: number, y1: number, n = 24): [n
 
 /** Abre un elemento de la lista por su nombre visible. */
 export async function openRow(page: Page, name: string) {
-  await page.locator('.row-main', { has: page.locator('.row-name', { hasText: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }) }).first().click();
+  await page.locator('.row-main, .card-main', { has: page.locator('.row-name', { hasText: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) }) }).first().click();
 }
 
 export async function ensureEdit(page: Page) {

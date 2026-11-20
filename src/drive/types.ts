@@ -15,6 +15,8 @@ export interface RemoteFile {
   trashed?: boolean;
   starred?: boolean;
   webViewLink?: string;
+  /** Enlace temporal (horas) a la miniatura que genera Drive. */
+  thumbnailLink?: string;
   capabilities?: { canEdit?: boolean; canRename?: boolean; canTrash?: boolean };
   shortcutDetails?: { targetId?: string; targetMimeType?: string };
 }
@@ -95,4 +97,4 @@ export class OfflineError extends Error {
 }
 
 export const REMOTE_FIELDS =
-  'id,name,mimeType,parents,modifiedTime,size,md5Checksum,version,trashed,starred,webViewLink,capabilities(canEdit,canRename,canTrash),shortcutDetails(targetId,targetMimeType)';
+  'id,name,mimeType,parents,modifiedTime,size,md5Checksum,version,trashed,starred,webViewLink,thumbnailLink,capabilities(canEdit,canRename,canTrash),shortcutDetails(targetId,targetMimeType)';

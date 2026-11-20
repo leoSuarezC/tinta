@@ -297,3 +297,26 @@ test('modo e-ink: blanco y negro y botones para pasar página', async ({ page })
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   expect(bg).toBe('rgb(255, 255, 255)');
 });
+
+test('las carpetas muestran tarjetas con vista previa y al tocarlas se abre el editor', async ({ page }) => {
+  await openDemo(page);
+  const card = (name: RegExp) => page.locator('.card', { has: page.locator('.card-name', { hasText: name }) }).first();
+
+  // Nota: se ven sus primeras líneas, con las tareas como casillas.
+  const mercado = card(/^Mercado$/);
+  await expect(mercado.locator('.card-text')).toContainText('Mercado del sábado');
+  await expect(mercado.locator('.card-text')).toContainText('☐ Café de Santander');
+  await expect(mercado.locator('.card-text')).toContainText('☑ Aguacates');
+  // Las carpetas siguen como filas.
+  await expect(page.locator('.rows .row-name', { hasText: /^A mano$/ })).toBeVisible();
+
+  // Cuaderno a mano: al tocar la tarjeta se abre el editor de tinta; al volver, la tarjeta muestra la página.
+  await openRow(page, 'A mano');
+  const cuaderno = card(/^Cuaderno de ejemplo/);
+  await cuaderno.locator('.card-main').click();
+  await expect(page.locator('.ink-page').first()).toBeVisible();
+  await page.goBack();
+  const img = cuaderno.locator('img.card-img.is-page');
+  await expect(img).toBeVisible();
+  await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(100);
+});

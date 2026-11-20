@@ -101,3 +101,8 @@ Registro de por qué Tinta es como es, para no deshacer algo sin conocer el moti
 - **Decisión:** Google Auth Platform en **Testing**, con `elionxl900@gmail.com` como único usuario de prueba. Branding y dominios de D20 se conservan (sirven si algún día se vuelve a publicar).
 - **Costo:** Google exige volver a dar permiso cada 7 días (la app muestra "Reconectar").
 - **Riesgo que sigue:** quien controle la cuenta de GitHub controla el código que usa el token → la cuenta de GitHub debe tener verificación en dos pasos. Verificado 2026-11-20: 2FA activo en `leoSuarezC` (app autenticadora + GitHub Mobile).
+
+## D22 — Archivos como tarjetas con vista previa
+- **Contexto (2026-11-20):** Leonardo pidió que cada carpeta muestre una vista previa de sus archivos y que al tocarlos se abra el editor. Eligió cuadrícula de tarjetas (no lista con vista previa) y miniaturas de Drive para lo no descargado.
+- **Decisión:** subcarpetas siguen como filas arriba; archivos como tarjetas. Notas: texto local (ya se precargan). Imágenes: copia local si existe, si no miniatura de Drive. Cuadernos/PDF: miniatura de Drive; si hay cambios sin subir o Drive no tiene miniatura, se dibuja la primera página con pdf.js en el dispositivo (una a la vez, solo las tarjetas visibles). Las miniaturas de Drive se cargan en `<img>` con `referrerPolicy=no-referrer`; si fallan se pide un enlace nuevo una vez por sesión y luego se muestra el ícono.
+- **Cambiaría si:** las miniaturas de Drive no cargan en el navegador (enlaces que exigen cookie de Google) → descargarlas con el token vía `fetch`, o depender solo de las copias locales.

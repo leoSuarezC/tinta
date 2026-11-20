@@ -34,6 +34,8 @@ export interface LocalItem {
   metaRev: number;
   /** El contenido está guardado localmente (para leerlo sin conexión). */
   cached: boolean;
+  /** Miniatura de Drive (enlace temporal; se renueva si falla). */
+  thumbnailLink?: string;
   syncError?: string;
 }
 
