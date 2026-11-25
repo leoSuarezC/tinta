@@ -110,28 +110,37 @@ function ImagePreview({ item }: { item: LocalItem }) {
   return <DriveThumb item={item} kind="image" />;
 }
 
+/** PDF hasta este tamaño se dibujan aquí (los cuadernos de la app pesan mucho menos). */
+const LOCAL_PDF_MAX = 4 * 1024 * 1024;
+
 /**
- * Cuaderno o PDF: si hay cambios sin subir (o no está en Drive) se dibuja la primera página aquí;
- * si no, la miniatura de Drive (que no gasta batería en el Boox), y si Drive no tiene, la de aquí.
+ * Cuaderno o PDF. La miniatura de Drive no dibuja las anotaciones, y los trazos de los cuadernos
+ * son anotaciones: por eso los PDF pequeños se dibujan en el dispositivo (se descargan si hace falta,
+ * y así quedan también para usar sin conexión). Los grandes usan la miniatura de Drive.
  */
 function PdfPreview({ item }: { item: LocalItem }) {
-  const local = item.dirtyContent || !item.driveId;
-  if (local) return <LocalPdf item={item} />;
+  const small = item.size === undefined || item.size <= LOCAL_PDF_MAX;
+  if (item.dirtyContent || !item.driveId || small) {
+    return <LocalPdf item={item} download={small} fallback={item.driveId ? <DriveThumb item={item} kind="pdf" /> : undefined} />;
+  }
   return <DriveThumb item={item} kind="pdf" fallback={<LocalPdf item={item} />} />;
 }
 
-function LocalPdf({ item }: { item: LocalItem }) {
-  const { store } = useServices();
+function LocalPdf({ item, download, fallback }: { item: LocalItem; download?: boolean; fallback?: React.ReactNode }) {
+  const { store, engine } = useServices();
   const opened = useApp((s) => s.route.file);
   const url = useQuery(
     async () => {
-      const blob = (await store.getContent(item.lid))?.blob;
-      return blob ? pdfThumb(`${item.lid}:${item.rev}:${blob.size}`, blob) : null;
+      const cached = (await store.getContent(item.lid))?.blob;
+      if (!cached && !(download && navigator.onLine)) return null;
+      const key = `${item.lid}:${item.rev}:${item.remoteMd5 ?? item.base?.md5 ?? ''}:${cached?.size ?? ''}`;
+      return pdfThumb(key, () => (cached && (item.cached || item.dirtyContent || !item.driveId) ? Promise.resolve(cached) : engine.readBlob(item.lid)));
     },
-    [item.lid, item.rev, opened],
-    null as string | null,
+    [item.lid, item.rev, item.remoteMd5, opened],
+    undefined as string | null | undefined,
   );
   if (url) return <img className="card-img is-page" src={url} alt="" draggable={false} />;
+  if (url === null && fallback) return <>{fallback}</>;
   return <BigIcon item={item} kind="pdf" />;
 }
 
@@ -181,11 +190,17 @@ function DriveThumb({ item, kind, fallback }: { item: LocalItem; kind: FileKind;
 const pdfCache = new Map<string, Promise<string | null>>();
 let pdfQueue: Promise<unknown> = Promise.resolve();
 
-/** Primera página como imagen. Una a la vez, para no trabar el Boox. */
-function pdfThumb(key: string, blob: Blob): Promise<string | null> {
+/** Primera página como imagen. Una a la vez (descarga incluida), para no trabar el Boox. */
+function pdfThumb(key: string, getBlob: () => Promise<Blob>): Promise<string | null> {
   let p = pdfCache.get(key);
   if (!p) {
-    p = pdfQueue.then(() => renderFirstPage(blob)).catch(() => null);
+    p = pdfQueue
+      .then(async () => renderFirstPage(await getBlob()))
+      .catch(() => null)
+      .then((u) => {
+        if (!u) pdfCache.delete(key); // sin conexión o error: se reintenta la próxima vez
+        return u;
+      });
     pdfQueue = p;
     pdfCache.set(key, p);
     if (pdfCache.size > 80) {

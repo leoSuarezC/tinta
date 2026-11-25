@@ -310,13 +310,26 @@ test('las carpetas muestran tarjetas con vista previa y al tocarlas se abre el e
   // Las carpetas siguen como filas.
   await expect(page.locator('.rows .row-name', { hasText: /^A mano$/ })).toBeVisible();
 
-  // Cuaderno a mano: al tocar la tarjeta se abre el editor de tinta; al volver, la tarjeta muestra la página.
+  // Cuaderno a mano: la tarjeta muestra la página CON los trazos (son anotaciones del PDF) sin abrirlo antes.
   await openRow(page, 'A mano');
   const cuaderno = card(/^Cuaderno de ejemplo/);
-  await cuaderno.locator('.card-main').click();
-  await expect(page.locator('.ink-page').first()).toBeVisible();
-  await page.goBack();
   const img = cuaderno.locator('img.card-img.is-page');
   await expect(img).toBeVisible();
   await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(100);
+  // Píxeles de color fuerte (tinta azul o roja), que la plantilla rayada no tiene.
+  const inked = await img.evaluate((el: HTMLImageElement) => {
+    const c = document.createElement('canvas');
+    c.width = el.naturalWidth;
+    c.height = el.naturalHeight;
+    const g = c.getContext('2d')!;
+    g.drawImage(el, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    let n = 0;
+    for (let i = 0; i < d.length; i += 4) if (Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]) > 90) n++;
+    return n;
+  });
+  expect(inked).toBeGreaterThan(200);
+  // Al tocar la tarjeta se abre el editor de tinta.
+  await cuaderno.locator('.card-main').click();
+  await expect(page.locator('.ink-page').first()).toBeVisible();
 });
