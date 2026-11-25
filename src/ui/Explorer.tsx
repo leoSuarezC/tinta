@@ -10,7 +10,7 @@ import { formatBytes } from '../model/fileTypes';
 import { cls, Empty, KindIcon, useLongPress } from './common';
 import { displayName, fold, isPending, itemKind, KIND_LABEL, relativeDate } from './format';
 import { SyncButton } from './SyncButton';
-import { FileCard } from './FileCard';
+import { Mosaic } from './Mosaic';
 import { PageButtons } from './PageButtons';
 
 export function Explorer() {
@@ -186,7 +186,7 @@ function FolderList({ folderLid }: { folderLid: string }) {
   );
 }
 
-/** Carpetas como filas arriba; archivos como tarjetas con vista previa debajo. */
+/** Carpetas como filas arriba; archivos como tarjetas en mosaico con vista previa debajo. */
 function Items({
   items,
   fileLid,
@@ -212,11 +212,7 @@ function Items({
         </ul>
       )}
       {files.length > 0 && (
-        <ul className="cards">
-          {files.map((i) => (
-            <FileCard key={keyPrefix + i.lid} item={i} active={i.lid === fileLid} showFolder={showFolder} />
-          ))}
-        </ul>
+        <Mosaic files={files} fileLid={fileLid} showFolder={showFolder} keyPrefix={keyPrefix} />
       )}
     </>
   );

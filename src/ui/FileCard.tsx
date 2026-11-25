@@ -12,7 +12,21 @@ import { cls, KindIcon, useLongPress } from './common';
 import { displayName, isPending, itemKind, relativeDate } from './format';
 
 /** Tarjeta de un archivo con vista previa de su contenido. Al tocarla se abre el editor. */
-export function FileCard({ item, active, showFolder }: { item: LocalItem; active?: boolean; showFolder?: boolean }) {
+export function FileCard({
+  item,
+  active,
+  showFolder,
+  style,
+  measure,
+}: {
+  item: LocalItem;
+  active?: boolean;
+  showFolder?: boolean;
+  /** Posición en el mosaico. */
+  style?: React.CSSProperties;
+  /** El mosaico mide la altura de cada tarjeta para acomodarlas. */
+  measure?: (el: HTMLLIElement | null) => void;
+}) {
   const openDialog = useApp((s) => s.openDialog);
   const parent = useItem(showFolder ? (item.parentLid ?? undefined) : undefined);
   const lp = useLongPress(() => openDialog({ type: 'item', lid: item.lid }));
@@ -24,7 +38,15 @@ export function FileCard({ item, active, showFolder }: { item: LocalItem; active
   const where = showFolder && parent && parent.lid !== ROOT_LID ? `En ${parent.name}` : relativeDate(item.modifiedTime);
 
   return (
-    <li ref={ref} className={cls('card', active && 'is-active', item.syncError && 'has-error')}>
+    <li
+      ref={(el) => {
+        ref.current = el;
+        measure?.(el);
+      }}
+      data-lid={item.lid}
+      style={style}
+      className={cls('card', active && 'is-active', item.syncError && 'has-error')}
+    >
       <button
         className="card-main"
         {...lp}
@@ -76,20 +98,25 @@ function BigIcon({ item, kind }: { item: LocalItem; kind: FileKind }) {
   );
 }
 
+/** La nota se muestra completa hasta este tamaño; más larga, se corta con un desvanecido. */
+const NOTE_LINES = 40;
+const NOTE_CHARS = 2000;
+
 function TextPreview({ item }: { item: LocalItem }) {
   const { store } = useServices();
   const lines = useQuery(
     async () => {
       const c = await store.getContent(item.lid);
-      return c?.text === undefined ? null : notePreview(c.text, displayName(item));
+      return c?.text === undefined ? null : notePreview(c.text, displayName(item), NOTE_LINES, NOTE_CHARS);
     },
     [item.lid, item.name],
     null as string[] | null,
   );
   if (lines === null) return <BigIcon item={item} kind={itemKind(item)} />;
   if (!lines.length) return <span className="card-text is-empty">Nota vacía</span>;
+  const cut = lines.length >= NOTE_LINES || lines[lines.length - 1].endsWith('…');
   return (
-    <span className="card-text">
+    <span className={cls('card-text', cut && 'is-cut')}>
       {lines.map((l, i) => (
         <span key={i} className="card-line">
           {l || ' '}

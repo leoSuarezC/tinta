@@ -309,6 +309,17 @@ test('las carpetas muestran tarjetas con vista previa y al tocarlas se abre el e
   await expect(mercado.locator('.card-text')).toContainText('☑ Aguacates');
   // Las carpetas siguen como filas.
   await expect(page.locator('.rows .row-name', { hasText: /^A mano$/ })).toBeVisible();
+  // La nota se ve completa (sin corte) y las tarjetas del mosaico no se enciman.
+  await expect(mercado.locator('.card-text')).toContainText('Panela');
+  await expect(mercado.locator('.card-text.is-cut')).toHaveCount(0);
+  const boxes = await page.locator('.cards.is-mosaic').last().locator(':scope > .card').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
+  expect(boxes.length).toBeGreaterThan(1);
+  for (let i = 0; i < boxes.length; i++)
+    for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i], b = boxes[j];
+      const overlap = a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1;
+      expect(overlap, `tarjetas ${i} y ${j} encimadas`).toBe(false);
+    }
 
   // Cuaderno a mano: la tarjeta muestra la página CON los trazos (son anotaciones del PDF) sin abrirlo antes.
   await openRow(page, 'A mano');
@@ -329,6 +340,9 @@ test('las carpetas muestran tarjetas con vista previa y al tocarlas se abre el e
     return n;
   });
   expect(inked).toBeGreaterThan(200);
+  // La página completa: se dibuja con su proporción, sin recortar.
+  const ratio = await img.evaluate((el: HTMLImageElement) => ({ shown: el.clientHeight / el.clientWidth, real: el.naturalHeight / el.naturalWidth }));
+  expect(Math.abs(ratio.shown - ratio.real)).toBeLessThan(0.02);
   // Al tocar la tarjeta se abre el editor de tinta.
   await cuaderno.locator('.card-main').click();
   await expect(page.locator('.ink-page').first()).toBeVisible();
